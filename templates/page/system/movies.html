@@ -1,0 +1,395 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>电影管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='libs/layui/css/layui.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='module/admin.css') }}"/>
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <input  id="power" type="hidden" value="{{ power }}" type="hidden">
+
+                    <div class="layui-inline">
+                        <label class="layui-form-label">电影名称:</label>
+                        <div class="layui-input-inline">
+                            <input name="name" class="layui-input" placeholder="输入电影名称"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="userTbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                    {% if  power !='user' %}
+                    <div class="layui-inline">
+                        <label class="layui-form-label">上传文件</label>
+                        <div class="layui-input-inline">
+                             <input type="text" name="attach" id="upload_message" autocomplete="off"
+                             class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn" id="upload"><i class="layui-icon"></i>上传文件</button>
+
+                    </div>
+                    {% endif %}
+
+                </div>
+            </form>
+            <!-- 数据表格 -->
+            <table id="userTable" lay-filter="userTable"></table>
+        </div>
+    </div>
+</div>
+
+
+<!-- 表格操作列 -->
+<script type="text/html" id="userTbBar">
+
+
+
+    {% if  power =='user' %}
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="watch">推荐</a>
+    {% else %}
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    {% endif %}
+
+
+    <!--<a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="reset">重置密码</a>-->
+</script>
+<!-- 表格状态列 -->
+{#<script type="text/html" id="userTbState">#}
+{#    <input type="checkbox" lay-filter="userTbStateCk" value="{{d.id}}" lay-skin="switch"#}
+{#           lay-text="正常|锁定" {{d.state==0?'checked':''}} style="display: none;"/>#}
+{#    <p style="display: none;">{{d.state==0?'正常':'锁定'}}</p>#}
+{#</script>#}
+<!-- 表单弹窗 -->
+<script type="text/html" id="userEditDialog">
+    <form id="userEditForm" lay-filter="userEditForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">电影名称:</label>
+            <div class="layui-input-block">
+                <input name="name" placeholder="请输入电影名称" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">海报网址:</label>
+            <div class="layui-input-block">
+                <input name="url" placeholder="请输入海报网址" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">时长:</label>
+            <div class="layui-input-block">
+                <input name="time" placeholder="请输入时长" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">电影类别:</label>
+            <div class="layui-input-block">
+                <input name="genre" placeholder="请输入电影类别" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">发行时间:</label>
+            <div class="layui-input-block">
+                <input name="release_time" placeholder="请输入发行时间" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">简介:</label>
+            <div class="layui-input-block">
+                <input name="intro" placeholder="请输入简介" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+                <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">导演:</label>
+            <div class="layui-input-block">
+                <input name="directors" placeholder="请输入导演" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+                <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">编剧:</label>
+            <div class="layui-input-block">
+                <input name="writers" placeholder="请输入编剧" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+                <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">演员:</label>
+            <div class="layui-input-block">
+                <input name="starts" placeholder="请输入演员" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="userEditSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+
+
+
+<!-- js部分 -->
+<script type="text/javascript" src="{{ url_for('static', filename='libs/layui/layui.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script>
+    layui.use(['layer', 'form', 'table', 'util', 'admin', 'xmSelect'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var util = layui.util;
+        var admin = layui.admin;
+        var xmSelect = layui.xmSelect;
+        var power = document.getElementById("power").value;
+        var toolbar=[]
+        if(power!="user")
+        {
+	      toolbar=['<p>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join('')
+             }
+
+        /* 渲染表格 */
+        /* 渲染表格 */
+        var insTb = table.render({
+            elem: '#userTable',
+            url: "/movie/get",
+            page: true,
+            toolbar: toolbar,
+            cellMinWidth: 100,
+            cols: [[
+                {type: 'checkbox'},
+                {type: 'numbers'},
+                {field: 'name', title: '电影名称', align: 'center', sort: true},
+                {field: 'url', title: '海报网址', align: 'center', sort: true},
+                {field: 'time', title: '时长', align: 'center', sort: true},
+                {field: 'genre', title: '类型', align: 'center', sort: true},
+                {field: 'release_time', title: '上映时间', align: 'center', sort: true},
+                {field: 'intro', title: '介绍', align: 'center', sort: true},
+                {field: 'directors', title: '导演', align: 'center', sort: true},
+                {field: 'writers', title: '编剧', align: 'center', sort: true},
+                {field: 'starts', title: '主演', align: 'center', sort: true},
+                {title: '操作', toolbar: '#userTbBar', align: 'center', minWidth: 200}
+            ]]
+        });
+        /* 表格搜索 */
+        form.on('submit(userTbSearch)', function (data) {
+
+            console.log(data.field)
+
+            insTb.reload({where: data.field, page: {curr: 1}});
+            return false;
+        });
+
+        /* 表格工具条点击事件 */
+        table.on('tool(userTable)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            } else if (obj.event === 'watch') { // 重置密码
+                watch(obj);
+            }
+        });
+
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(userTable)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('userTable');
+                if (checkRows.data.length === 0) {
+                    layer.msg('请选择要删除的数据', {icon: 2});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                doDel({ids: ids});
+            }
+            else if (obj.event === 'upload') { // 删除
+                var checkRows = table.checkStatus('userTable');
+                if (checkRows.data.length === 0) {
+                    layer.msg('请选择要删除的数据', {icon: 2});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                doDel({ids: ids});
+            }
+        });
+
+        /* 显示表单弹窗 */
+         /* 新增和修改用户 */
+        function showEditModel(mData) {
+            admin.open({
+                type: 1,
+                title: (mData ? '修改' : '添加') + '电影',
+                content: $('#userEditDialog').html(),
+                success: function (layero, dIndex) {
+                    // 回显表单数据
+                    form.val('userEditForm', mData);
+                    // 表单提交事件
+                    form.on('submit(userEditSubmit)', function (data) {
+                        console.log(data)
+
+                        var loadIndex = layer.load(2);
+
+                        $.get(mData ? "http://127.0.0.1:5000/movie/update" : "http://127.0.0.1:5000/movie/add", data.field, function (res) {  // 实际项目这里url可以是mData?'user/update':'user/add'
+                            layer.close(loadIndex);
+                            if (res.code === 200) {
+                                layer.close(dIndex);
+                                layer.msg(res.msg, {icon: 1});
+                                insTb.reload({page: {curr: 1}});
+                            } else {
+                                layer.msg(res.msg, {icon: 2});
+                            }
+                        }, 'json');
+                        return false;
+                    });
+                    // 禁止弹窗出现滚动条
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                }
+            });
+        }
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                shade: .1
+            },
+                function (i) {
+                layer.close(i);
+                var loadIndex = layer.load(2);
+                var res={
+                    id: obj.data.id ? obj.data.id : '',
+                    ids: obj.ids ? obj.ids.join(',') : ''
+                }
+
+            $.ajax({
+                type: "post",
+                contentType: 'application/json',
+                url: "/movie/del",
+                data: JSON.stringify(res),
+                dataType: 'json',
+                success: function (res) {
+                   layer.close(loadIndex);
+                    if (res.code == '200') {
+                         layer.close(loadIndex);
+                    if (res.code === 200) {
+                        layer.msg(res.msg, {icon: 1});
+                        insTb.reload({page: {curr: 1}});
+                    } else {
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                    }
+                }
+            })
+            }
+
+
+            );
+        }
+
+
+         /* 观看 */
+        function watch(obj) {
+            layer.confirm('确定要对选中电影进行推荐吗？', {
+                skin: 'layui-layer-admin',
+                shade: .1
+            },
+                function (i) {
+                layer.close(i);
+                var loadIndex = layer.load(2);
+                var res={
+                    id: obj.data.id ? obj.data.id : '',
+                }
+            $.ajax({
+                type: "post",
+                contentType: 'application/json',
+                url: "{{ url_for('repr_movie_search_res') }}",
+                data: JSON.stringify(res),
+                dataType: 'json',
+                success: function (res) {
+                    console.log("test")
+                   layer.close(loadIndex);
+                    if (res.code == '200') {
+                         layer.close(loadIndex);
+                         window.location.replace(window.location.href + "removie");
+                    if (res.code === 200) {
+                        layer.msg(res.msg, {icon: 1});
+                        insTb.reload({page: {curr: 1}});
+                    } else {
+
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                    }
+                }
+
+            })
+            }
+
+
+            );
+
+        }
+
+    });
+    layui.use(['upload', 'layer'], function () {
+        var upload = layui.upload;
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        console.log("text")
+        upload.render({
+            elem: '#upload',
+            url: '/uploadm',
+            accept: 'file',
+            exts: 'xls|xlsx',
+            size: 2048,
+            done: function (res) {
+                console.log(res);
+                if (res.code === 0) {
+                    layer.msg(res.filename + '上传成功');
+                    $("#upload_message").val(res.filename);
+
+                } else {
+                    layer.alert('上传失败');
+                    $("#upload_message").val('上传失败！');
+                }
+            }
+        });
+    })
+</script>
+</body>
+</html>

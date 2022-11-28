@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>用户管理</title>
+{#    <link rel="stylesheet" href="../../../assets/libs/layui/css/layui.css"/>#}
+{#    <link rel="stylesheet" href="../../../assets/module/admin.css?v=318"/>#}
+    <link rel="stylesheet" href="{{ url_for('static', filename='libs/layui/css/layui.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='module/admin.css') }}"/>
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<!-- 正文开始 -->
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!-- 表格工具栏 -->
+            <form class="layui-form toolbar">
+                <div class="layui-form-item">
+                    <input  id="power" type="hidden" value="{{ power }}" type="hidden">
+
+                    <div class="layui-inline">
+                        <label class="layui-form-label">用户名:</label>
+                        <div class="layui-input-inline">
+                            <input name="username" class="layui-input" placeholder="输入用户名"/>
+                        </div>
+                    </div>
+                    <div class="layui-inline">&emsp;
+                        <button class="layui-btn icon-btn" lay-filter="userTbSearch" lay-submit>
+                            <i class="layui-icon">&#xe615;</i>搜索
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!-- 数据表格 -->
+            <table id="userTable" lay-filter="userTable"></table>
+        </div>
+    </div>
+</div>
+
+<!-- 表格操作列 -->
+<script type="text/html" id="userTbBar">
+
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+{#    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>#}
+    <!--<a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="reset">重置密码</a>-->
+</script>
+{#<!-- 表格状态列 -->#}
+{#<script type="text/html" id="userTbState">#}
+{#    <input type="checkbox" lay-filter="userTbStateCk" value="{{d.id}}" lay-skin="switch"#}
+{#           lay-text="正常|锁定" {{d.state==0?'checked':''}} style="display: none;"/>#}
+{#    <p style="display: none;">{{d.state==0?'正常':'锁定'}}</p>#}
+{#</script>#}
+<!-- 表单弹窗 -->
+<script type="text/html" id="userEditDialog">
+    <form id="userEditForm" lay-filter="userEditForm" class="layui-form model-form">
+        <input name="id" type="hidden"/>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">用户名:</label>
+            <div class="layui-input-block">
+                <input name="username" placeholder="请输入用户名" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">性别:</label>
+            <div class="layui-input-block">
+                <input type="radio" name="gender" value="M" title="男" checked/>
+                <input type="radio" name="gender" value="F" title="女"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">年龄:</label>
+            <div class="layui-input-block">
+                <input name="age" placeholder="请输入年龄" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">工作:</label>
+            <div class="layui-input-block">
+                <input name="Job" placeholder="请输入工作" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">邮箱:</label>
+            <div class="layui-input-block">
+                <input name="email" placeholder="请输入邮箱" class="layui-input"
+                       lay-verType="tips" lay-verify="email" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">邮编:</label>
+            <div class="layui-input-block">
+                <input name="Zip_code" placeholder="请输入邮编" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label layui-form-required">密码:</label>
+            <div class="layui-input-block">
+                <input name="password" placeholder="请输入密码" class="layui-input"
+                       lay-verType="tips" lay-verify="required" required/>
+            </div>
+        </div>
+{#          <div class="layui-form-item">#}
+{#            <label class="layui-form-label layui-form-required">角色:</label>#}
+{#            <div class="layui-input-block">#}
+{#                <input type="radio" name="power"  value="admin" title="管理员" checked/>#}
+{#                <input type="radio" name="power" value="user" title="用户"/>#}
+{#            </div>#}
+{#        </div>#}
+        <div class="layui-form-item text-right">
+            <button class="layui-btn" lay-filter="userEditSubmit" lay-submit>保存</button>
+            <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        </div>
+    </form>
+</script>
+
+<!-- js部分 -->
+<script type="text/javascript" src="{{ url_for('static', filename='libs/layui/layui.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script>
+    layui.use(['layer', 'form', 'table', 'util', 'admin', 'xmSelect'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var table = layui.table;
+        var util = layui.util;
+        var admin = layui.admin;
+        var xmSelect = layui.xmSelect;
+        var power = document.getElementById("power").value;
+        var toolbar=[]
+        if(power!="user")
+        {
+	      toolbar=['<p>',
+                '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>添加</button>&nbsp;',
+                '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>',
+                '</p>'].join('')
+             }
+
+        /* 渲染表格 */
+        var insTb = table.render({
+
+            elem: '#userTable',
+            url: "/user/get",
+            page: true,
+            toolbar: toolbar,
+            cellMinWidth: 100,
+            cols: [[
+                {type: 'checkbox'},
+                {type: 'numbers'},
+                {field: 'username', title: '用户名', sort: true},
+                {field: 'gender', title: '性别', sort: true},
+                {field: 'age', title: '年龄', sort: true},
+                {field: 'Job', title: '工作', sort: true},
+                {field: 'Zip_code', title: '邮编', sort: true},
+                {field: 'power', title: '权限', sort: true},
+                {field: 'password', title: '密码', sort: true},
+                {title: '操作', toolbar: '#userTbBar', align: 'center', minWidth: 200}
+            ]]
+        });
+
+        /* 表格搜索 */
+         form.on('submit(userTbSearch)', function (data) {
+
+           console.log(data.field)
+           insTb.reload({where: data.field, page: {curr: 1}});
+             return false;
+         });
+
+
+        /* 表格工具条点击事件 */
+        table.on('tool(userTable)', function (obj) {
+            if (obj.event === 'edit') { // 修改
+                showEditModel(obj.data);
+            } else if (obj.event === 'del') { // 删除
+                doDel(obj);
+            } else if (obj.event === 'reset') { // 重置密码
+                resetPsw(obj);
+            }
+        });
+
+        /* 表格头工具栏点击事件 */
+        table.on('toolbar(userTable)', function (obj) {
+            if (obj.event === 'add') { // 添加
+                showEditModel();
+            } else if (obj.event === 'del') { // 删除
+                var checkRows = table.checkStatus('userTable');
+                if (checkRows.data.length === 0) {
+                    layer.msg('请选择要删除的数据', {icon: 2});
+                    return;
+                }
+                var ids = checkRows.data.map(function (d) {
+                    return d.id;
+                });
+                doDel({ids: ids});
+            }
+        });
+
+        /* 显示表单弹窗 */
+         /* 新增和修改用户 */
+        function showEditModel(mData) {
+            admin.open({
+                type: 1,
+                title: (mData ? '修改' : '添加') + '用户',
+                content: $('#userEditDialog').html(),
+                success: function (layero, dIndex) {
+                    // 回显表单数据
+                    form.val('userEditForm', mData);
+                    // 表单提交事件
+                    form.on('submit(userEditSubmit)', function (data) {
+                        console.log(data)
+
+                        var loadIndex = layer.load(2);
+
+                        $.get(mData ? "http://127.0.0.1:5000/user/update" : "http://127.0.0.1:5000/user/add", data.field, function (res) {  // 实际项目这里url可以是mData?'user/update':'user/add'
+                            layer.close(loadIndex);
+                            if (res.code === 200) {
+                                layer.close(dIndex);
+                                layer.msg(res.msg, {icon: 1});
+                                insTb.reload({page: {curr: 1}});
+                            } else {
+                                layer.msg(res.msg, {icon: 2});
+                            }
+                        }, 'json');
+                        return false;
+                    });
+                    // // 渲染多选下拉框
+                    // var insRoleSel = xmSelect.render({
+                    //     el: '#userEditRoleSel',
+                    //     name: 'userEditRoleSel',
+                    //     layVerify: 'required',
+                    //     layVerType: 'tips',
+                    //     data: [{
+                    //         name: '管理员',
+                    //         value: 1
+                    //     }, {
+                    //         name: '普通用户',
+                    //         value: 2
+                    //     }, {
+                    //         name: '游客',
+                    //         value: 3
+                    //     }]
+                    // });
+                    // // 回显选中角色
+                    // if (mData && mData.roles) {
+                    //     insRoleSel.setValue(mData.roles.map(function (item) {
+                    //         return item.roleId;
+                    //     }));
+                    // }
+                    // 禁止弹窗出现滚动条
+                    $(layero).children('.layui-layer-content').css('overflow', 'visible');
+                }
+            });
+        }
+
+        /* 删除 */
+        function doDel(obj) {
+            layer.confirm('确定要删除选中数据吗？', {
+                skin: 'layui-layer-admin',
+                shade: .1
+            },
+                function (i) {
+                layer.close(i);
+                var loadIndex = layer.load(2);
+                var res={
+                    id: obj.data && obj.data.id ? obj.data.id : '',
+                    ids: obj.ids ? obj.ids.join(',') : ''
+                }
+
+                // $.post("http://127.0.0.1:5000/del_user", {
+                //     id: obj.data.id ? obj.data.id : '',
+                //     ids: obj.ids ? obj.ids.join(',') : ''
+                // }, function (res) {
+                //     layer.close(loadIndex);
+                //     if (res.code === 200) {
+                //         layer.msg(res.msg, {icon: 1});
+                //         insTb.reload({page: {curr: 1}});
+                //     } else {
+                //         layer.msg(res.msg, {icon: 2});
+                //     }
+                // }, 'json');
+            $.ajax({
+                type: "post",
+                contentType: 'application/json',
+                url: "http://127.0.0.1:5000/user/del",
+                data: JSON.stringify(res),
+                dataType: 'json',
+                success: function (res) {
+                   layer.close(loadIndex);
+                    if (res.code == '200') {
+                         layer.close(loadIndex);
+                    if (res.code === 200) {
+                        layer.msg(res.msg, {icon: 1});
+                        insTb.reload({page: {curr: 1}});
+                    } else {
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                    }
+                }
+            })
+            }
+
+            );
+        }
+
+
+
+
+
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+            layer.confirm('确定要对选中电影进行推荐吗？', {
+                skin: 'layui-layer-admin',
+                shade: .1
+            },
+                function (i) {
+                layer.close(i);
+                var loadIndex = layer.load(2);
+                var res={
+                    id: obj.data.id ? obj.data.id : '',
+                }
+            $.ajax({
+                type: "post",
+                contentType: 'application/json',
+                url: "{{ url_for('repr_movie_search_res') }}",
+                data: JSON.stringify(res),
+                dataType: 'json',
+
+            })
+            }
+
+
+            );
+
+
+
+
+
+
+
+            $.ajax({
+		        type: 'post',
+		        url: '{{ url_for('repr_movie_search_res') }}',
+		        id: obj.data.id ? obj.data.id : '',
+		        dataType:"json",
+		        async:true,
+		        success: function(id) {
+		    	    layer.open({
+					    title: ['温馨提示'],
+					    content: '确定对电影进行推荐？',
+					    btn: ['确定', '取消'],
+					    shadeClose: true,
+					    //回调函数
+					    yes: function(index, layero){
+					    self.location='http://127.0.0.1:5000/movie_search_res';//确定按钮跳转地址
+					    },
+
+			    });
+		    }})
+
+
+
+</body>
+</html>
